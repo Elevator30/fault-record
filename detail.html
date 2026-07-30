@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>故障记录详情</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: #f5f6f8;
+  color: #2d3748;
+  font-size: 15px;
+  padding-bottom: 100px;
+}
+.top-bar {
+  background: linear-gradient(135deg, #4a5568, #2d3748);
+  color: white;
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.top-bar .back { font-size: 20px; margin-right: 12px; width: 28px; }
+.top-bar .title { flex: 1; font-size: 17px; font-weight: 600; text-align: center; padding-right: 40px; }
+.top-bar .print-btn {
+  background: rgba(255,255,255,0.2);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.top-bar .print-btn:active { background: rgba(255,255,255,0.3); }
+
+.section {
+  background: white;
+  margin: 10px 12px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d3748;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f2f5;
+  background: #fafbfc;
+  display: flex;
+  align-items: center;
+}
+.section-title .icon { margin-right: 6px; }
+.form-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f2f5;
+  min-height: 44px;
+}
+.form-row:last-child { border-bottom: none; }
+.form-row label {
+  width: 100px;
+  font-size: 14px;
+  color: #4a5568;
+  flex-shrink: 0;
+}
+.form-row.full label { width: auto; margin-bottom: 8px; }
+.form-row.full { flex-direction: column; align-items: stretch; }
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row input[type="date"],
+.form-row input[type="time"],
+.form-row select,
+.form-row textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #2d3748;
+  background: transparent;
+  font-family: inherit;
+}
+.form-row textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px 0;
+  resize: none;
+  line-height: 1.6;
+}
+.form-row input::placeholder,
+.form-row textarea::placeholder { color: #cbd5e0; }
+
+.checkbox-group {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0;
+}
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #4a5568;
+  background: #fafbfc;
+}
+.checkbox-item.active {
+  border-color: #48bb78;
+  background: #f0fff4;
+  color: #276749;
+}
+.checkbox-item .mark {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #cbd5e0;
+  border-radius: 3px;
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: white;
+}
+.checkbox-item.active .mark {
+  background: #48bb78;
+  border-color: #48bb78;
+}
+.checkbox-item.active .mark::after { content: '✓'; }
+
+.radio-group {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+}
+.radio-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #4a5568;
+}
+.radio-item .circle {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cbd5e0;
+  border-radius: 50%;
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radio-item.active .circle {
+  border-color: #48bb78;
+}
+.radio-item.active .circle::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #48bb78;
+}
+
+.sub-group {
+  padding-left: 14px;
+  margin-top: 4px;
+  border-left: 2px solid #e2e8f0;
+}
+.sub-group-title {
+  font-size: 13px;
+  color: #718096;
+  margin: 6px 0 4px;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 10px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+  z-index: 100;
+}
+.btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-secondary {
+  background: #edf2f7;
+  color: #4a5568;
+}
+.btn-secondary:active { background: #e2e8f0; }
+.btn-danger {
+  background: #fed7d7;
+  color: #c53030;
+}
+.btn-danger:active { background: #feb2b2; }
+
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 200;
+  display: none;
+}
+
+/* 打印区域 */
+#printArea { display: none; }
+
+@media print {
+  body * { visibility: hidden; }
+  #printArea, #printArea * { visibility: visible; }
+  #printArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="back" onclick="goBack()">‹</div>
+  <div class="title" id="pageTitle">新增故障记录</div>
+  <div class="print-btn" onclick="handlePrint()">打印</div>
+</div>
+
+<!-- 基本信息 -->
+<div class="section">
+  <div class="section-title"><span class="icon">📋</span>基本信息</div>
+  <div class="form-row">
+    <label>设备名称</label>
+    <input type="text" id="f_deviceName" placeholder="如：1号楼客梯" onblur="saveData()">
+  </div>
+  <div class="form-row">
+    <label>设备型号</label>
+    <input type="text" id="f_deviceModel" placeholder="设备型号" onblur="saveData()">
+  </div>
+  <div class="form-row">
+    <label>产品编号</label>
+    <input type="text" id="f_productNo" placeholder="产品编号" onblur="saveData()">
+  </div>
+  <div class="form-row">
+    <label>使用单位</label>
+    <input type="text" id="f_useUnit" placeholder="使用单位名称" onblur="saveData()">
+  </div>
+  <div class="form-row">
+    <label>维保单位</label>
+    <input type="text" id="f_maintenanceUnit" placeholder="维保单位名称" value="长沙鑫鸿电梯有限公司" onblur="saveData()">
+  </div>
+</div>
+
+<!-- 故障信息 -->
+<div class="section">
+  <div class="section-title"><span class="icon">⚠️</span>故障信息</div>
+  <div class="form-row">
+    <label>故障时间</label>
+    <input type="datetime-local" id="f_faultTime" onchange="saveData()">
+  </div>
+  <div class="form-row">
+    <label>报修时间</label>
+    <input type="datetime-local" id="f_reportTime" onchange="saveData()">
+  </div>
+  <div class="form-row">
+    <label>排除时间</label>
+    <input type="datetime-local" id="f_fixTime" onchange="saveData()">
+  </div>
+  <div class="form-row">
+    <label>故障排除人</label>
+    <input type="text" id="f_fixPerson" placeholder="故障排除人姓名" onblur="saveData()">
+  </div>
+</div>
+
+<!-- 故障模式 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🔧</span>故障模式（可多选）</div>
+  <div class="form-row full">
+    <div class="checkbox-group" id="faultModeGroup">
+    </div>
+  </div>
+</div>
+
+<!-- 是否困人 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🚪</span>困人情况</div>
+  <div class="form-row">
+    <label>是否困人</label>
+    <div class="radio-group">
+      <div class="radio-item" onclick="setTrapped('是')">
+        <div class="circle"></div><span>是</span>
+      </div>
+      <div class="radio-item active" onclick="setTrapped('否')">
+        <div class="circle"></div><span>否</span>
+      </div>
+    </div>
+  </div>
+  <div class="form-row" id="trappedCountRow" style="display:none;">
+    <label>被困人数</label>
+    <input type="number" id="f_trappedCount" placeholder="被困人数" onblur="saveData()">
+    <span style="color:#a0aec0;font-size:13px;margin-left:6px;">人</span>
+  </div>
+</div>
+
+<!-- 故障原因 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🔍</span>故障原因（可多选）</div>
+  
+  <div class="form-row">
+    <label style="width:auto;">
+      <div class="checkbox-item" id="cause_design" onclick="toggleCauseTop('design')">
+        <div class="mark"></div><span>设计制造缺陷</span>
+      </div>
+    </label>
+  </div>
+  
+  <div class="form-row">
+    <label style="width:auto;">
+      <div class="checkbox-item" id="cause_install" onclick="toggleCauseTop('install')">
+        <div class="mark"></div><span>安装缺陷</span>
+      </div>
+    </label>
+  </div>
+  
+  <div style="padding: 8px 14px 12px;">
+    <div class="checkbox-item" id="cause_maintenance" onclick="toggleCauseTop('maintenance')" style="margin-bottom: 8px;">
+      <div class="mark"></div><span>维保缺陷</span>
+    </div>
+    <div class="sub-group" id="maintenanceSub" style="display:none; padding-left: 20px; border-left: 2px solid #e2e8f0; margin-left: 8px;">
+      <div class="checkbox-item" id="cause_m_adjust" onclick="toggleCauseSub('maintenance','adjust')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>调整（设置）不当</span>
+      </div>
+      <div class="checkbox-item" id="cause_m_miss" onclick="toggleCauseSub('maintenance','miss')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>维保检查未发现</span>
+      </div>
+      <div class="checkbox-item" id="cause_m_other" onclick="toggleCauseSub('maintenance','other')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>其他</span>
+      </div>
+      <div id="maintenanceOtherInput" style="display:none; margin-top: 6px;">
+        <input type="text" id="f_maintenanceOther" placeholder="请说明..." 
+               onblur="updateField('maintenanceOther', this.value)" 
+               style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; font-family: inherit;">
+      </div>
+    </div>
+  </div>
+  
+  <div style="padding: 0 14px 12px;">
+    <div class="checkbox-item" id="cause_usage" onclick="toggleCauseTop('usage')" style="margin-bottom: 8px;">
+      <div class="mark"></div><span>使用管理不当</span>
+    </div>
+    <div class="sub-group" id="usageSub" style="display:none; padding-left: 20px; border-left: 2px solid #e2e8f0; margin-left: 8px;">
+      <div class="checkbox-item" id="cause_u_door" onclick="toggleCauseSub('usage','door')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>门被异物卡住</span>
+      </div>
+      <div class="checkbox-item" id="cause_u_manual" onclick="toggleCauseSub('usage','manual')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>人为损坏、误操作</span>
+      </div>
+      <div class="checkbox-item" id="cause_u_power" onclick="toggleCauseSub('usage','power')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>停电、跳闸</span>
+      </div>
+      <div class="checkbox-item" id="cause_u_other" onclick="toggleCauseSub('usage','other')" style="margin: 4px 8px 4px 0;">
+        <div class="mark"></div><span>其他</span>
+      </div>
+      <div id="usageOtherInput" style="display:none; margin-top: 6px;">
+        <input type="text" id="f_usageOther" placeholder="请说明..." 
+               onblur="updateField('usageOther', this.value)"
+               style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; font-family: inherit;">
+      </div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <label style="width:auto;">
+      <div class="checkbox-item" id="cause_other" onclick="toggleCauseTop('other')">
+        <div class="mark"></div><span>其它</span>
+      </div>
+    </label>
+  </div>
+  <div id="otherCauseInput" style="display:none; padding: 0 14px 12px;">
+    <input type="text" id="f_otherCause" placeholder="请说明其它原因..." 
+           onblur="updateField('otherCause', this.value)"
+           style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; font-family: inherit;">
+  </div>
+</div>
+
+<!-- 故障经过 -->
+<div class="section">
+  <div class="section-title"><span class="icon">📝</span>故障发生经过</div>
+  <div class="form-row full">
+    <textarea id="f_faultDescription" placeholder="请描述故障发生的经过..." onblur="saveData()"></textarea>
+  </div>
+</div>
+
+<!-- 维修内容 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🛠️</span>维修内容</div>
+  <div class="form-row full">
+    <textarea id="f_repairContent" placeholder="请描述维修内容..." onblur="saveData()"></textarea>
+  </div>
+</div>
+
+<!-- 更换配件 -->
+<div class="section">
+  <div class="section-title"><span class="icon">⚙️</span>更换的配件及耗材</div>
+  <div class="form-row full">
+    <textarea id="f_partsReplaced" placeholder="请填写更换的配件和耗材..." onblur="saveData()"></textarea>
+  </div>
+</div>
+
+<!-- 修理结果 -->
+<div class="section">
+  <div class="section-title"><span class="icon">✅</span>修理结果</div>
+  <div class="form-row full">
+    <textarea id="f_repairResult" placeholder="请填写修理结果..." onblur="saveData()"></textarea>
+  </div>
+</div>
+
+<!-- 签字 -->
+<div class="section">
+  <div class="section-title"><span class="icon">✍️</span>签字</div>
+  <div class="form-row" onclick="goSignPage()">
+    <label>人员签字</label>
+    <div style="flex:1; text-align:right; color:#48bb78;">去签字 →</div>
+  </div>
+</div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" onclick="deleteRecord()">删除</button>
+  <button class="btn btn-primary" onclick="handlePrint()">生成PDF</button>
+</div>
+
+<div class="toast" id="toast">已保存</div>
+
+<!-- 打印区域 -->
+<div id="printArea"></div>
+
+<script>
+const DB_NAME = 'faultRecordDB';
+const STORE_NAME = 'records';
+let db = null;
+let recordId = null;
+let data = null;
+let autoSaveTimer = null;
+
+const FAULT_MODES = [
+  '开关门故障', '层门区外停梯', '无法启动运行',
+  '运行中开门', '超速（溜车）', '冲顶或蹲底', '其他'
+];
+
+const FAULT_CAUSES = {
+  design: '设计制造缺陷',
+  install: '安装缺陷',
+  maintenance: {
+    label: '维保缺陷',
+    subs: {
+      adjust: '调整（设置）不当',
+      miss: '维保检查未发现',
+      other: '其他'
+    }
+  },
+  usage: {
+    label: '使用管理不当',
+    subs: {
+      door: '门被异物卡住',
+      manual: '人为损坏、误操作或操作不当',
+      power: '停电、跳闸',
+      other: '其他'
+    }
+  },
+  other: '其它'
+};
+
+function initDB(callback) {
+  const req = indexedDB.open(DB_NAME, 1);
+  req.onupgradeneeded = function(e) {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains(STORE_NAME)) {
+      const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+      store.createIndex('createTime', 'createTime', { unique: false });
+    }
+  };
+  req.onsuccess = function(e) {
+    db = e.target.result;
+    callback && callback();
+  };
+}
+
+function getParam(name) {
+  const m = location.search.match(new RegExp('[?&]' + name + '=([^&]+)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function createDefaultData() {
+  return {
+    deviceName: '',
+    deviceModel: '',
+    productNo: '',
+    maintenanceUnit: '长沙鑫鸿电梯有限公司',
+    faultTime: '',
+    reportTime: '',
+    fixTime: '',
+    fixPerson: '',
+    faultModes: [],
+    isTrapped: '否',
+    trappedCount: '',
+    faultCauses: {},
+    maintenanceOther: '',
+    usageOther: '',
+    otherCause: '',
+    faultDescription: '',
+    repairContent: '',
+    partsReplaced: '',
+    repairResult: '',
+    signatures: {},
+    createTime: Date.now(),
+    updateTime: Date.now()
+  };
+}
+
+function loadRecord() {
+  recordId = getParam('id');
+  if (recordId) {
+    recordId = parseInt(recordId);
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(recordId);
+    req.onsuccess = function() {
+      data = req.result || createDefaultData();
+      document.getElementById('pageTitle').textContent = '故障记录详情';
+      renderForm();
+    };
+  } else {
+    data = createDefaultData();
+    renderForm();
+  }
+}
+
+function renderForm() {
+  document.getElementById('f_deviceName').value = data.deviceName || '';
+  document.getElementById('f_deviceModel').value = data.deviceModel || '';
+  document.getElementById('f_productNo').value = data.productNo || '';
+  document.getElementById('f_maintenanceUnit').value = data.maintenanceUnit || '长沙鑫鸿电梯有限公司';
+  document.getElementById('f_faultTime').value = data.faultTime || '';
+  document.getElementById('f_reportTime').value = data.reportTime || '';
+  document.getElementById('f_fixTime').value = data.fixTime || '';
+  document.getElementById('f_fixPerson').value = data.fixPerson || '';
+  document.getElementById('f_trappedCount').value = data.trappedCount || '';
+  document.getElementById('f_faultDescription').value = data.faultDescription || '';
+  document.getElementById('f_repairContent').value = data.repairContent || '';
+  document.getElementById('f_partsReplaced').value = data.partsReplaced || '';
+  document.getElementById('f_repairResult').value = data.repairResult || '';
+  document.getElementById('f_useUnit').value = data.useUnit || '';
+  document.getElementById('f_maintenanceOther').value = data.maintenanceOther || '';
+  document.getElementById('f_usageOther').value = data.usageOther || '';
+  document.getElementById('f_otherCause').value = data.otherCause || '';
+
+  // 困人
+  setTrappedUI(data.isTrapped || '否');
+
+  // 故障模式
+  renderCheckboxGroup('faultModeGroup', FAULT_MODES, data.faultModes || [], 'toggleFaultMode');
+
+  // 故障原因
+  renderFaultCauses();
+}
+
+function renderCheckboxGroup(containerId, items, selected, toggleFn) {
+  const container = document.getElementById(containerId);
+  let html = '';
+  for (let i = 0; i < items.length; i++) {
+    const isActive = (selected || []).indexOf(items[i]) >= 0;
+    html += '<div class="checkbox-item ' + (isActive ? 'active' : '') + '" onclick="' + toggleFn + '(\'' + items[i].replace(/'/g, "\\'") + '\')">' +
+      '<div class="mark"></div><span>' + items[i] + '</span></div>';
+  }
+  container.innerHTML = html;
+}
+
+function toggleFaultMode(item) {
+  if (!data.faultModes) data.faultModes = [];
+  const idx = data.faultModes.indexOf(item);
+  if (idx >= 0) {
+    data.faultModes.splice(idx, 1);
+  } else {
+    data.faultModes.push(item);
+  }
+  renderCheckboxGroup('faultModeGroup', FAULT_MODES, data.faultModes, 'toggleFaultMode');
+  saveData();
+}
+
+// ========== 故障原因分组逻辑 ==========
+function renderFaultCauses() {
+  const causes = data.faultCauses || {};
+  
+  // 顶层原因
+  ['design', 'install', 'maintenance', 'usage', 'other'].forEach(function(key) {
+    const el = document.getElementById('cause_' + key);
+    if (el) {
+      if (causes[key]) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    }
+  });
+  
+  // 维保子项展开
+  const maintSub = document.getElementById('maintenanceSub');
+  if (causes.maintenance) {
+    maintSub.style.display = 'block';
+    if (causes.maintenanceSubItems) {
+      ['adjust', 'miss', 'other'].forEach(function(sub) {
+        const el = document.getElementById('cause_m_' + sub);
+        if (el) {
+          if (causes.maintenanceSubItems[sub]) {
+            el.classList.add('active');
+          } else {
+            el.classList.remove('active');
+          }
+        }
+      });
+      // 维保其他输入框
+      document.getElementById('maintenanceOtherInput').style.display = causes.maintenanceSubItems.other ? 'block' : 'none';
+      document.getElementById('f_maintenanceOther').value = data.maintenanceOther || '';
+    }
+  } else {
+    maintSub.style.display = 'none';
+  }
+  
+  // 使用管理子项展开
+  const usageSub = document.getElementById('usageSub');
+  if (causes.usage) {
+    usageSub.style.display = 'block';
+    if (causes.usageSubItems) {
+      ['door', 'manual', 'power', 'other'].forEach(function(sub) {
+        const el = document.getElementById('cause_u_' + sub);
+        if (el) {
+          if (causes.usageSubItems[sub]) {
+            el.classList.add('active');
+          } else {
+            el.classList.remove('active');
+          }
+        }
+      });
+      // 使用管理其他输入框
+      document.getElementById('usageOtherInput').style.display = causes.usageSubItems.other ? 'block' : 'none';
+      document.getElementById('f_usageOther').value = data.usageOther || '';
+    }
+  } else {
+    usageSub.style.display = 'none';
+  }
+  
+  // 其他原因输入框
+  document.getElementById('otherCauseInput').style.display = causes.other ? 'block' : 'none';
+  document.getElementById('f_otherCause').value = data.otherCause || '';
+}
+
+function toggleCauseTop(key) {
+  if (!data.faultCauses) data.faultCauses = {};
+  
+  if (data.faultCauses[key]) {
+    // 取消选中
+    delete data.faultCauses[key];
+    if (key === 'maintenance') delete data.faultCauses.maintenanceSubItems;
+    if (key === 'usage') delete data.faultCauses.usageSubItems;
+  } else {
+    // 选中
+    data.faultCauses[key] = true;
+    if (key === 'maintenance') data.faultCauses.maintenanceSubItems = {};
+    if (key === 'usage') data.faultCauses.usageSubItems = {};
+  }
+  
+  renderFaultCauses();
+  saveData();
+}
+
+function toggleCauseSub(parent, sub) {
+  if (!data.faultCauses) data.faultCauses = {};
+  const subKey = parent + 'SubItems';
+  if (!data.faultCauses[subKey]) data.faultCauses[subKey] = {};
+  
+  if (data.faultCauses[subKey][sub]) {
+    delete data.faultCauses[subKey][sub];
+  } else {
+    data.faultCauses[subKey][sub] = true;
+  }
+  
+  renderFaultCauses();
+  saveData();
+}
+
+function goSignPage() {
+  if (!recordId) {
+    saveData();
+    setTimeout(function() {
+      if (recordId) location.href = 'sign.html?id=' + recordId;
+    }, 300);
+  } else {
+    location.href = 'sign.html?id=' + recordId;
+  }
+}
+
+function setTrapped(val) {
+  data.isTrapped = val;
+  setTrappedUI(val);
+  saveData();
+}
+
+function setTrappedUI(val) {
+  const items = document.querySelectorAll('.radio-item');
+  items.forEach(function(item) {
+    const text = item.querySelector('span').textContent;
+    if (text === val) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+  document.getElementById('trappedCountRow').style.display = val === '是' ? 'flex' : 'none';
+}
+
+function updateField(field, value) {
+  if (field.indexOf('.') > 0) {
+    const parts = field.split('.');
+    let obj = data;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!obj[parts[i]]) obj[parts[i]] = {};
+      obj = obj[parts[i]];
+    }
+    obj[parts[parts.length - 1]] = value;
+  } else {
+    data[field] = value;
+  }
+  saveData();
+}
+
+function saveData() {
+  if (!data) return;
+  data.updateTime = Date.now();
+  
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(function() {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    
+    if (recordId) {
+      store.put(data);
+    } else {
+      const req = store.add(data);
+      req.onsuccess = function() {
+        recordId = req.result;
+        data.id = recordId;
+        history.replaceState(null, '', '?id=' + recordId);
+        document.getElementById('pageTitle').textContent = '故障记录详情';
+      };
+    }
+    showToast('已保存');
+  }, 500);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 1500);
+}
+
+function deleteRecord() {
+  if (!recordId) {
+    goBack();
+    return;
+  }
+  if (!confirm('确定删除这条记录吗？')) return;
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  const store = tx.objectStore(STORE_NAME);
+  store.delete(recordId);
+  tx.oncomplete = function() {
+    showToast('已删除');
+    setTimeout(goBack, 800);
+  };
+}
+
+function goBack() {
+  location.href = 'index.html';
+}
+
+// ========== 打印相关 ==========
+function handlePrint() {
+  buildPrintHTML(function() {
+    generatePDF();
+  });
+}
+
+function buildPrintHTML(callback) {
+  const d = data || {};
+  const stampUrl = 'stamp.png';
+  
+  const faultModesText = (d.faultModes || []).join('、');
+  
+  // 构建故障原因文本
+  function getCausesText() {
+    const c = d.faultCauses || {};
+    let arr = [];
+    if (c.design) arr.push('设计制造缺陷');
+    if (c.install) arr.push('安装缺陷');
+    if (c.maintenance) {
+      const subs = c.maintenanceSubItems || {};
+      let items = [];
+      if (subs.adjust) items.push('调整（设置）不当');
+      if (subs.miss) items.push('维保检查未发现');
+      if (subs.other) items.push('其他' + (d.maintenanceOther ? '：' + d.maintenanceOther : ''));
+      arr.push('维保缺陷：' + items.join('、'));
+    }
+    if (c.usage) {
+      const subs = c.usageSubItems || {};
+      let items = [];
+      if (subs.door) items.push('门被异物卡住');
+      if (subs.manual) items.push('人为损坏、误操作或操作不当');
+      if (subs.power) items.push('停电、跳闸');
+      if (subs.other) items.push('其他' + (d.usageOther ? '：' + d.usageOther : ''));
+      arr.push('使用管理不当：' + items.join('、'));
+    }
+    if (c.other) arr.push('其它' + (d.otherCause ? '：' + d.otherCause : ''));
+    return arr.join('；');
+  }
+  const faultCausesText = getCausesText();
+  const trappedText = d.isTrapped === '是' ? '是' : '否';
+  const trappedCountText = d.isTrapped === '是' ? (d.trappedCount || '') + ' 人' : '';
+  
+  // 格式化日期
+  function fmtDate(dt) {
+    if (!dt) return '';
+    const d = new Date(dt);
+    return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日';
+  }
+  
+  const faultDate = fmtDate(d.faultTime);
+  const reportDate = fmtDate(d.reportTime);
+  const fixDate = fmtDate(d.fixTime);
+
+  const html = `
+<div style="width: 1000px; padding: 20px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
+  <h2 style="text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 15px; letter-spacing: 4px;">电梯故障记录表</h2>
+  
+  <table border="1" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+    <colgroup>
+      <col style="width: 10%;">
+      <col style="width: 20%;">
+      <col style="width: 10%;">
+      <col style="width: 20%;">
+      <col style="width: 25%;">
+      <col style="width: 15%;">
+    </colgroup>
+    
+    <!-- 第1行 -->
+    <tr style="height: 36px;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">设备名称</td>
+      <td style="padding: 0 8px;">${escapeHtml(d.deviceName || '')}</td>
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">使用单位</td>
+      <td style="padding: 0 8px;" colspan="3">${escapeHtml(d.useUnit || '')}</td>
+    </tr>
+    
+    <!-- 第2行 -->
+    <tr style="height: 36px;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">设备型号</td>
+      <td style="padding: 0 8px;">${escapeHtml(d.deviceModel || '')}</td>
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">维保单位</td>
+      <td style="padding: 0 8px;" colspan="3">${escapeHtml(d.maintenanceUnit || '')}</td>
+    </tr>
+    
+    <!-- 第3行 -->
+    <tr style="height: 36px;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">产品编号</td>
+      <td style="padding: 0 8px;">${escapeHtml(d.productNo || '')}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    
+    <!-- 第3行 -->
+    <tr style="height: 36px;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">故障发生时间</td>
+      <td style="padding: 0 8px;">${escapeHtml(faultDate)}</td>
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">报修时间</td>
+      <td style="padding: 0 8px;">${escapeHtml(reportDate)}</td>
+      <td style="padding: 0 8px;"></td>
+      <td></td>
+    </tr>
+    
+    <!-- 第4行 故障模式 -->
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5; padding-top: 8px;">故障模式</td>
+      <td style="padding: 6px 8px; line-height: 1.8;" colspan="4">
+        ${FAULT_MODES.map(function(m) {
+          const checked = (d.faultModes || []).indexOf(m) >= 0;
+          return (checked ? '☑' : '□') + ' ' + m + '，';
+        }).join(' ')}
+      </td>
+      <td></td>
+    </tr>
+    
+    <!-- 第5行 是否困人 -->
+    <tr style="height: 36px;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">是否困人</td>
+      <td style="padding: 0 8px;">${d.isTrapped === '是' ? '☑' : '□'} 是&nbsp;&nbsp;&nbsp;${d.isTrapped === '否' ? '☑' : '□'} 否</td>
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">被困人数</td>
+      <td style="padding: 0 8px;" colspan="2">${escapeHtml(d.trappedCount || '')} 人</td>
+      <td></td>
+    </tr>
+    
+    <!-- 第6行 -->
+    <tr style="height: 36px;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">故障排除时间</td>
+      <td style="padding: 0 8px;">${escapeHtml(fixDate)}</td>
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5;">故障排除人</td>
+      <td style="padding: 0 8px;">${escapeHtml(d.fixPerson || '')}</td>
+      <td style="padding: 0 8px;"></td>
+      <td></td>
+    </tr>
+    
+    <!-- 第7行 故障原因 -->
+    <tr style="height: 100px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5; padding-top: 8px;">故障原因</td>
+      <td style="padding: 6px 8px; line-height: 1.8;" colspan="4">
+        ${escapeHtml(faultCausesText)}
+      </td>
+      <td></td>
+    </tr>
+    
+    <!-- 第8行 故障发生经过 -->
+    <tr style="height: 80px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5; padding-top: 8px;">故障发生经过</td>
+      <td style="padding: 6px 8px; line-height: 1.6;" colspan="4">${escapeHtml(d.faultDescription || '')}</td>
+      <td style="padding: 8px; font-size: 13px; line-height: 1.8; position: relative;">
+        维修人：<br>
+        ${d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 30px; display: block; margin: 2px 0;">' : ''}
+        <br>
+        维保单位（公章）：<br>
+        <div style="position: relative; height: 45px;">
+          <img src="${stampUrl}" style="position: absolute; right: 5px; top: -5px; width: 60px; height: 60px; opacity: 0.85;">
+        </div>
+        &nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;月&nbsp;&nbsp;日
+      </td>
+    </tr>
+    
+    <!-- 第9行 维修内容 -->
+    <tr style="height: 80px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5; padding-top: 8px;">维修内容</td>
+      <td style="padding: 6px 8px; line-height: 1.6;" colspan="4">${escapeHtml(d.repairContent || '')}</td>
+      <td style="padding: 8px; font-size: 13px; line-height: 1.8; position: relative;">
+        维修人：<br>
+        ${d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 30px; display: block; margin: 2px 0;">' : ''}
+        <br>
+        维保单位（公章）：<br>
+        <div style="position: relative; height: 40px;">
+          <img src="${stampUrl}" style="position: absolute; right: 5px; bottom: -5px; width: 55px; height: 55px; opacity: 0.85;">
+        </div>
+        &nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;月&nbsp;&nbsp;日
+      </td>
+    </tr>
+    
+    <!-- 第10行 更换配件 -->
+    <tr style="height: 80px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5; padding-top: 8px;">更换的配件<br>及耗材</td>
+      <td style="padding: 6px 8px; line-height: 1.6;" colspan="4">${escapeHtml(d.partsReplaced || '')}</td>
+      <td style="padding: 8px; font-size: 13px; line-height: 1.8; position: relative;">
+        维修人：<br>
+        ${d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 30px; display: block; margin: 2px 0;">' : ''}
+        <br>
+        维保单位（公章）：<br>
+        <div style="position: relative; height: 45px;">
+          <img src="${stampUrl}" style="position: absolute; right: 5px; top: -5px; width: 60px; height: 60px; opacity: 0.85;">
+        </div>
+        &nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;月&nbsp;&nbsp;日
+      </td>
+    </tr>
+    
+    <!-- 第11行 修理结果 -->
+    <tr style="height: 80px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; background: #f5f5f5; padding-top: 8px;">修理结果</td>
+      <td style="padding: 6px 8px; line-height: 1.6;" colspan="4">${escapeHtml(d.repairResult || '')}</td>
+      <td style="padding: 8px; font-size: 13px; line-height: 1.8;">
+        安全管理员：<br>
+        ${d.signatures && d.signatures.safety ? '<img src="' + d.signatures.safety + '" style="height: 30px; display: block; margin: 2px 0;">' : ''}
+        <br>
+        使用单位（公章）：<br>
+        <br>
+        &nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;月&nbsp;&nbsp;日
+      </td>
+    </tr>
+    
+    <!-- 第12行 验收人 -->
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="background: #fff;"></td>
+      <td colspan="4" style="background: #fff;"></td>
+      <td style="padding: 8px; font-size: 13px; line-height: 1.8;">
+        验收人：<br>
+        ${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 30px; display: block; margin: 2px 0;">' : ''}
+        <br>
+        使用单位（公章）：<br>
+        &nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;月&nbsp;&nbsp;日
+      </td>
+    </tr>
+  </table>
+</div>`;
+  
+  document.getElementById('printArea').innerHTML = html;
+  
+  // 等待图片加载
+  const imgs = document.getElementById('printArea').querySelectorAll('img');
+  let loaded = 0;
+  const total = imgs.length;
+  if (total === 0) {
+    callback && callback();
+  } else {
+    function check() {
+      loaded++;
+      if (loaded >= total) callback && callback();
+    }
+    imgs.forEach(function(img) {
+      if (img.complete) {
+        check();
+      } else {
+        img.onload = check;
+        img.onerror = check;
+      }
+    });
+  }
+}
+
+function generatePDF() {
+  showToast('正在生成PDF...');
+  
+  const element = document.getElementById('printArea');
+  if (!element) {
+    showToast('打印区域不存在');
+    return;
+  }
+  
+  html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff'
+  }).then(function(canvas) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('l', 'mm', 'a4'); // 横版A4
+    
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 280; // A4横版宽度
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 5, 10, imgWidth, imgHeight);
+    
+    // 文件名
+    const name = (data.deviceName || '故障记录') + '_' + (data.faultTime ? data.faultTime.substring(0,10).replace(/-/g,'') : '');
+    pdf.save(name + '_电梯故障记录.pdf');
+    
+    showToast('PDF已生成');
+  }).catch(function(err) {
+    console.error(err);
+    showToast('生成失败：' + err.message);
+  });
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+// 初始化
+window.onload = function() {
+  initDB(function() {
+    loadRecord();
+  });
+};
+
+// 全局绑定
+window.goBack = goBack;
+window.handlePrint = handlePrint;
+window.deleteRecord = deleteRecord;
+window.saveData = saveData;
+window.updateField = updateField;
+window.setTrapped = setTrapped;
+window.toggleFaultMode = toggleFaultMode;
+window.toggleCauseTop = toggleCauseTop;
+window.toggleCauseSub = toggleCauseSub;
+window.goSignPage = goSignPage;
+</script>
+</body>
+</html>

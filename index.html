@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>电梯故障记录表</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: #f5f6f8;
+  color: #2d3748;
+  font-size: 15px;
+  padding-bottom: 80px;
+}
+.header {
+  background: linear-gradient(135deg, #4a5568, #2d3748);
+  color: white;
+  padding: 18px 16px;
+  padding-top: calc(18px + env(safe-area-inset-top));
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 3px; }
+.card-list { padding: 12px; }
+.record-card {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  position: relative;
+}
+.record-card:active { background: #f7fafc; }
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 6px;
+}
+.card-info {
+  font-size: 13px;
+  color: #718096;
+  line-height: 1.7;
+}
+.card-info span { color: #4a5568; }
+.card-status {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.status-pending { background: #fefcbf; color: #975a16; }
+.status-done { background: #c6f6d5; color: #276749; }
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #a0aec0;
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.add-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(72,187,120,0.4);
+  z-index: 100;
+  padding-bottom: 4px;
+}
+.add-btn:active { transform: scale(0.95); }
+.count-info {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #718096;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>电梯故障记录表</h1>
+  <div class="subtitle">长沙鑫鸿电梯有限公司</div>
+</div>
+
+<div class="count-info" id="countInfo">共 0 条记录</div>
+
+<div class="card-list" id="recordList"></div>
+
+<div class="empty-state" id="emptyState" style="display:none;">
+  <div class="icon">📋</div>
+  <div>暂无故障记录</div>
+  <div style="font-size:13px; margin-top:6px;">点击右下角 + 添加</div>
+</div>
+
+<div class="add-btn" onclick="goNew()">+</div>
+
+<script>
+const DB_NAME = 'faultRecordDB';
+const STORE_NAME = 'records';
+let db = null;
+
+function initDB(callback) {
+  const req = indexedDB.open(DB_NAME, 1);
+  req.onupgradeneeded = function(e) {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains(STORE_NAME)) {
+      const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+      store.createIndex('createTime', 'createTime', { unique: false });
+    }
+  };
+  req.onsuccess = function(e) {
+    db = e.target.result;
+    callback && callback();
+  };
+  req.onerror = function() {
+    alert('数据库打开失败');
+  };
+}
+
+function getAllRecords(callback) {
+  const tx = db.transaction(STORE_NAME, 'readonly');
+  const store = tx.objectStore(STORE_NAME);
+  const req = store.getAll();
+  req.onsuccess = function() {
+    const list = req.result || [];
+    list.sort((a, b) => (b.createTime || 0) - (a.createTime || 0));
+    callback(list);
+  };
+}
+
+function renderList(list) {
+  const container = document.getElementById('recordList');
+  const emptyState = document.getElementById('emptyState');
+  document.getElementById('countInfo').textContent = '共 ' + list.length + ' 条记录';
+  
+  if (list.length === 0) {
+    container.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+  
+  let html = '';
+  for (let i = 0; i < list.length; i++) {
+    const r = list[i];
+    const date = r.faultTime ? r.faultTime.substring(0, 10) : (r.createTime ? new Date(r.createTime).toLocaleDateString() : '');
+    const device = r.deviceName || '未填写设备';
+    const done = r.repairResult && r.repairResult.trim();
+    const statusClass = done ? 'status-done' : 'status-pending';
+    const statusText = done ? '已完成' : '进行中';
+    
+    html += '<div class="record-card" onclick="goDetail(' + r.id + ')">' +
+      '<div class="card-status ' + statusClass + '">' + statusText + '</div>' +
+      '<div class="card-title">' + escapeHtml(device) + '</div>' +
+      '<div class="card-info">' +
+      '型号：<span>' + escapeHtml(r.deviceModel || '-') + '</span><br>' +
+      '故障时间：<span>' + escapeHtml(date || '-') + '</span><br>' +
+      '维保单位：<span>' + escapeHtml(r.maintenanceUnit || '-') + '</span>' +
+      '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+function goNew() {
+  location.href = 'detail.html';
+}
+
+function goDetail(id) {
+  location.href = 'detail.html?id=' + id;
+}
+
+window.onload = function() {
+  initDB(function() {
+    getAllRecords(renderList);
+  });
+};
+
+window.goNew = goNew;
+window.goDetail = goDetail;
+</script>
+</body>
+</html>

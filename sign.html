@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>签字</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  background: #2d3748;
+}
+.sign-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.sign-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  background: #1a202c;
+  color: white;
+  flex-shrink: 0;
+}
+.sign-header .back { font-size: 20px; width: 32px; }
+.sign-header .title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; padding-right: 32px; }
+.sign-header .save-btn {
+  background: #48bb78;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+}
+
+.sign-tabs {
+  display: flex;
+  background: #1a202c;
+  padding: 0 16px 8px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.sign-tab {
+  flex: 1;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 14px;
+  color: #a0aec0;
+  background: #2d3748;
+  border-radius: 6px;
+}
+.sign-tab.active {
+  color: white;
+  background: #4a5568;
+}
+
+.sign-area {
+  flex: 1;
+  position: relative;
+  background: white;
+  margin: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sign-area canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.sign-label {
+  position: absolute;
+  bottom: 10px;
+  right: 16px;
+  font-size: 14px;
+  color: #a0aec0;
+  pointer-events: none;
+}
+.sign-date {
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+  font-size: 14px;
+  color: #a0aec0;
+}
+
+.sign-footer {
+  display: flex;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: #1a202c;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.btn {
+  flex: 1;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.btn-clear { background: #4a5568; color: white; }
+.btn-save { background: #48bb78; color: white; }
+</style>
+</head>
+<body>
+
+<div class="sign-page">
+  <div class="sign-header">
+    <div class="back" onclick="goBack()">‹</div>
+    <div class="title" id="currentSignTitle">维修人签字</div>
+    <button class="save-btn" onclick="saveAll()">完成</button>
+  </div>
+  
+  <div class="sign-tabs">
+    <div class="sign-tab active" id="tab_repair" onclick="switchSign('repair')">维修人</div>
+    <div class="sign-tab" id="tab_safety" onclick="switchSign('safety')">安全管理员</div>
+    <div class="sign-tab" id="tab_inspector" onclick="switchSign('inspector')">验收人</div>
+  </div>
+  
+  <div class="sign-area">
+    <canvas id="signCanvas"></canvas>
+    <div class="sign-date" id="signDate"></div>
+    <div class="sign-label" id="signLabel">维修人签字</div>
+  </div>
+  
+  <div class="sign-footer">
+    <button class="btn btn-clear" onclick="clearCanvas()">清除</button>
+    <button class="btn btn-save" onclick="saveCurrent()">保存本页</button>
+  </div>
+</div>
+
+<script>
+const DB_NAME = 'faultRecordDB';
+const STORE_NAME = 'records';
+let db = null;
+let recordId = null;
+let data = null;
+let currentSign = 'repair';
+let isDrawing = false;
+let canvas, ctx;
+let signData = {
+  repair: null,
+  safety: null,
+  inspector: null
+};
+
+const SIGN_TITLES = {
+  repair: '维修人签字',
+  safety: '安全管理员签字',
+  inspector: '验收人签字'
+};
+
+function initDB(callback) {
+  const req = indexedDB.open(DB_NAME, 1);
+  req.onupgradeneeded = function(e) {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains(STORE_NAME)) {
+      db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+    }
+  };
+  req.onsuccess = function(e) {
+    db = e.target.result;
+    callback && callback();
+  };
+}
+
+function getParam(name) {
+  const m = location.search.match(new RegExp('[?&]' + name + '=([^&]+)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function loadRecord() {
+  recordId = getParam('id');
+  if (!recordId) {
+    alert('记录不存在');
+    return;
+  }
+  recordId = parseInt(recordId);
+  const tx = db.transaction(STORE_NAME, 'readonly');
+  const store = tx.objectStore(STORE_NAME);
+  const req = store.get(recordId);
+  req.onsuccess = function() {
+    data = req.result;
+    if (data && data.signatures) {
+      if (data.signatures.repair) signData.repair = data.signatures.repair;
+      if (data.signatures.safety) signData.safety = data.signatures.safety;
+      if (data.signatures.inspector) signData.inspector = data.signatures.inspector;
+    }
+    initCanvas();
+    loadSignToCanvas(currentSign);
+    updateDate();
+  };
+}
+
+function updateDate() {
+  const now = new Date();
+  const str = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日';
+  document.getElementById('signDate').textContent = str;
+}
+
+function initCanvas() {
+  canvas = document.getElementById('signCanvas');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1a202c';
+  
+  // 触摸事件
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+  // 鼠标事件（桌面测试用）
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+}
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  let x, y;
+  if (e.touches && e.touches[0]) {
+    x = e.touches[0].clientX - rect.left;
+    y = e.touches[0].clientY - rect.top;
+  } else {
+    x = e.clientX - rect.left;
+    y = e.clientY - rect.top;
+  }
+  return { x, y };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  isDrawing = true;
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+}
+
+function endDraw() {
+  isDrawing = false;
+}
+
+function clearCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
+}
+
+function switchSign(name) {
+  // 保存当前的
+  saveCurrentData();
+  
+  currentSign = name;
+  document.querySelectorAll('.sign-tab').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  document.getElementById('tab_' + name).classList.add('active');
+  document.getElementById('currentSignTitle').textContent = SIGN_TITLES[name];
+  document.getElementById('signLabel').textContent = SIGN_TITLES[name];
+  
+  clearCanvas();
+  loadSignToCanvas(name);
+}
+
+function loadSignToCanvas(name) {
+  if (signData[name]) {
+    const img = new Image();
+    img.onload = function() {
+      const rect = canvas.getBoundingClientRect();
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    };
+    img.src = signData[name];
+  }
+}
+
+function saveCurrentData() {
+  const rect = canvas.getBoundingClientRect();
+  // 检查画布是否有内容
+  const imageData = ctx.getImageData(0, 0, rect.width * 2, rect.height * 2);
+  let hasContent = false;
+  for (let i = 3; i < imageData.data.length; i += 4) {
+    if (imageData.data[i] > 0) {
+      hasContent = true;
+      break;
+    }
+  }
+  if (hasContent) {
+    signData[currentSign] = canvas.toDataURL('image/png');
+  }
+}
+
+function saveCurrent() {
+  saveCurrentData();
+  showToast('已保存');
+}
+
+function saveAll() {
+  saveCurrentData();
+  if (!data.signatures) data.signatures = {};
+  data.signatures.repair = signData.repair;
+  data.signatures.safety = signData.safety;
+  data.signatures.inspector = signData.inspector;
+  data.updateTime = Date.now();
+  
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  const store = tx.objectStore(STORE_NAME);
+  store.put(data);
+  tx.oncomplete = function() {
+    showToast('已保存');
+    setTimeout(goBack, 800);
+  };
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:white;padding:10px 20px;border-radius:6px;font-size:14px;z-index:100;';
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 1500);
+}
+
+function goBack() {
+  location.href = 'detail.html?id=' + recordId;
+}
+
+window.onload = function() {
+  initDB(loadRecord);
+  
+  // 监听方向变化，重新调整canvas大小
+  window.addEventListener('resize', function() {
+    const currentContent = canvas.toDataURL('image/png');
+    setTimeout(function() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      ctx = canvas.getContext('2d');
+      ctx.scale(2, 2);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#1a202c';
+      const img = new Image();
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      };
+      img.src = currentContent;
+    }, 100);
+  });
+};
+
+window.switchSign = switchSign;
+window.clearCanvas = clearCanvas;
+window.saveCurrent = saveCurrent;
+window.saveAll = saveAll;
+window.goBack = goBack;
+</script>
+</body>
+</html>
