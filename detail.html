@@ -310,6 +310,9 @@ body {
     <div class="checkbox-group" id="faultModeGroup">
     </div>
   </div>
+  <div class="form-row full" id="faultModeOtherRow" style="display:none;">
+    <input type="text" id="f_faultModeOther" placeholder="请说明其他故障模式..." onblur="updateField('faultModeOther', this.value)">
+  </div>
 </div>
 
 <!-- 是否困人 -->
@@ -591,6 +594,14 @@ function renderForm() {
 
   // 故障模式
   renderCheckboxGroup('faultModeGroup', FAULT_MODES, data.faultModes || [], 'toggleFaultMode');
+  // 故障模式其他输入框
+  const fmRow = document.getElementById('faultModeOtherRow');
+  if ((data.faultModes || []).indexOf('其他') >= 0) {
+    fmRow.style.display = '';
+    document.getElementById('f_faultModeOther').value = data.faultModeOther || '';
+  } else {
+    fmRow.style.display = 'none';
+  }
 
   // 故障原因
   renderFaultCauses();
@@ -616,6 +627,13 @@ function toggleFaultMode(item) {
     data.faultModes.push(item);
   }
   renderCheckboxGroup('faultModeGroup', FAULT_MODES, data.faultModes, 'toggleFaultMode');
+  // 其他输入框显示/隐藏
+  const otherRow = document.getElementById('faultModeOtherRow');
+  if (data.faultModes.indexOf('其他') >= 0) {
+    otherRow.style.display = '';
+  } else {
+    otherRow.style.display = 'none';
+  }
   saveData();
 }
 
@@ -826,7 +844,10 @@ function buildPrintHTML(callback) {
   const d = data || {};
   const stampUrl = 'stamp.png';
   
-  const faultModesText = (d.faultModes || []).join('、');
+  let faultModesText = (d.faultModes || []).join('、');
+  if ((d.faultModes || []).indexOf('其他') >= 0 && d.faultModeOther) {
+    faultModesText = faultModesText.replace('其他', '其他（' + d.faultModeOther + '）');
+  }
   
   // 构建故障原因文本
   function getCausesText() {
