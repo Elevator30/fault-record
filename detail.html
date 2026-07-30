@@ -235,7 +235,13 @@ body {
 }
 
 /* 打印区域 */
-#printArea { display: none; }
+#printArea {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  width: 1000px;
+  background: white;
+}
 
 @media print {
   body * { visibility: hidden; }
@@ -403,18 +409,6 @@ body {
     </div>
   </div>
   
-  <div class="form-row">
-    <label style="width:auto;">
-      <div class="checkbox-item" id="cause_other" onclick="toggleCauseTop('other')">
-        <div class="mark"></div><span>其它</span>
-      </div>
-    </label>
-  </div>
-  <div id="otherCauseInput" style="display:none; padding: 0 14px 12px;">
-    <input type="text" id="f_otherCause" placeholder="请说明其它原因..." 
-           onblur="updateField('otherCause', this.value)"
-           style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; font-family: inherit;">
-  </div>
 </div>
 
 <!-- 故障经过 -->
