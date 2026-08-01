@@ -239,7 +239,7 @@ body {
   position: fixed;
   left: -9999px;
   top: -9999px;
-  width: 1000px;
+  width: 940px;
   background: white;
 }
 
@@ -888,7 +888,7 @@ function buildPrintHTML(callback) {
   const fixDate = fmtDate(d.fixTime);
 
   const html = `
-<div style="width: 900px; padding: 20px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
+<div style="width: 100%; padding: 10px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
   <h2 style="text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 15px; letter-spacing: 4px;">电梯故障记录表</h2>
   
   <table border="1" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 14px;">
@@ -1081,29 +1081,76 @@ function generatePDF() {
     return;
   }
   
-  html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff'
-  }).then(function(canvas) {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('l', 'mm', 'a4'); // 横版A4
-    
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 280; // A4横版宽度
-    const imgHeight = canvas.height * imgWidth / canvas.width;
-    
-    pdf.addImage(imgData, 'PNG', 5, 10, imgWidth, imgHeight);
-    
-    // 文件名
-    const name = (data.deviceName || '故障记录') + '_' + (data.faultTime ? data.faultTime.substring(0,10).replace(/-/g,'') : '');
-    pdf.save(name + '_电梯故障记录.pdf');
-    
-    showToast('PDF已生成');
-  }).catch(function(err) {
-    console.error(err);
-    showToast('生成失败：' + err.message);
+  // 临时移到 viewport 内（解决 iOS Safari 不渲染 viewport 外元素的问题）
+  const origLeft = element.style.left;
+  const origTop = element.style.top;
+  const origZ = element.style.zIndex;
+  element.style.left = '0px';
+  element.style.top = '0px';
+  element.style.zIndex = '-1';
+  
+  function doCapture() {
+    html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff'
+    }).then(function(canvas) {
+      // 恢复位置
+      element.style.left = origLeft;
+      element.style.top = origTop;
+      element.style.zIndex = origZ;
+      
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 287;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      
+      // A4横版可用高度约195mm
+      const pageHeightMM = 195;
+      const totalPages = Math.ceil(imgHeight / pageHeightMM);
+      
+      if (totalPages <= 1) {
+        pdf.addImage(imgData, 'PNG', 5, 8, imgWidth, imgHeight);
+      } else {
+        for (let i = 0; i < totalPages; i++) {
+          if (i > 0) pdf.addPage();
+          
+          const ratioY = i * pageHeightMM / imgHeight;
+          const nextRatioY = Math.min((i + 1) * pageHeightMM / imgHeight, 1);
+          const startY = Math.floor(canvas.height * ratioY);
+          const endY = Math.ceil(canvas.height * nextRatioY);
+          const sliceH = endY - startY;
+          
+          const tmp = document.createElement('canvas');
+          tmp.width = canvas.width;
+          tmp.height = sliceH;
+          tmp.getContext('2d').drawImage(canvas, 0, startY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+          
+          const sliceData = tmp.toDataURL('image/png');
+          const sliceHMM = sliceH * imgWidth / canvas.width;
+          pdf.addImage(sliceData, 'PNG', 5, 8, imgWidth, sliceHMM);
+        }
+      }
+      
+      const name = (data.deviceName || '故障记录') + '_' + (data.faultTime ? data.faultTime.substring(0,10).replace(/-/g,'') : '');
+      pdf.save(name + '_电梯故障记录.pdf');
+      
+      showToast('PDF已生成');
+    }).catch(function(err) {
+      element.style.left = origLeft;
+      element.style.top = origTop;
+      element.style.zIndex = origZ;
+      console.error(err);
+      showToast('生成失败：' + err.message);
+    });
+  }
+  
+  // 等一帧让浏览器渲染
+  requestAnimationFrame(function() {
+    setTimeout(doCapture, 50);
   });
 }
 
