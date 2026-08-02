@@ -899,19 +899,19 @@ function buildPrintHTML(callback) {
   
   function sigCell(rowKey, hasSignContent) {
     const sigImg = d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : '';
-    return '<td style="padding: 6px 8px; line-height: 1.6; vertical-align: top; position: relative; min-height: 80px;">' +
+    return '<td style="padding: 4px 8px; line-height: 1.4; vertical-align: top; position: relative;">' +
       '维修人：<br>' + sigImg + '<br>' +
-      '维保单位（公章）：<br><br>' +
+      '维保单位（公章）：<br>' +
       stampHtml(rowKey) +
-      '<span style="font-size: 12px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span>' +
+      '<div style="text-align: right; padding-right: 4px;"><span style="font-size: 13px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>' +
       '</td>';
   }
 
   const html = `
-<div style="width: 100%; padding: 10px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
-  <h2 style="text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 15px; letter-spacing: 4px;">电梯故障记录表</h2>
+<div style="width: 100%; padding: 6px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
+  <h2 style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 8px; letter-spacing: 4px;">电梯故障记录表</h2>
   
-  <table border="1" cellpadding="4" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed;">
+  <table border="1" cellpadding="3" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed;">
     <colgroup>
       <col style="width: 15%;">
       <col style="width: 35%;">
@@ -940,9 +940,9 @@ function buildPrintHTML(callback) {
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(reportDate)}</td>
     </tr>
     
-    <tr style="min-height: 50px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 6px 4px;">故障模式</td>
-      <td colspan="3" style="padding: 6px 10px; line-height: 1.8;">
+    <tr style="min-height: 40px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障模式</td>
+      <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">
         ${FAULT_MODES.slice(0,5).map(function(m) {
           const checked = (d.faultModes || []).indexOf(m) >= 0;
           return (checked ? '☑' : '□') + ' ' + m + ' ';
@@ -970,60 +970,61 @@ function buildPrintHTML(callback) {
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.fixPerson || '')}</td>
     </tr>
     
-    <tr style="min-height: 110px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 6px 4px;">故障原因</td>
-      <td colspan="3" style="padding: 6px 10px; line-height: 1.8;">
+    <tr style="min-height: 90px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障原因</td>
+      <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
-        ${(data.faultCauses && data.faultCauses.maintenance) ? '☑' : '□'} 维保缺陷：
-          ${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.adjust) ? '☑' : '□'}调整（设置）不当，
+        维保缺陷：<br>
+          &nbsp;&nbsp;${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.adjust) ? '☑' : '□'}调整（设置）不当，
           ${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.miss) ? '☑' : '□'}维保检查未发现，
           ${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.other) ? '☑' : '□'}其他${d.maintenanceOther ? '（' + d.maintenanceOther + '）' : ''}<br>
-        ${(data.faultCauses && data.faultCauses.usage) ? '☑' : '□'} 使用管理不当：
-          ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.door) ? '☑' : '□'}门被异物卡住，
+        使用管理不当：<br>
+          &nbsp;&nbsp;${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.door) ? '☑' : '□'}门被异物卡住，
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.manual) ? '☑' : '□'}人为损坏、误操作或操作不当，
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.power) ? '☑' : '□'}停电、跳闸，
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.other) ? '☑' : '□'}其他${d.usageOther ? '（' + d.usageOther + '）' : ''}
       </td>
     </tr>
     
-    <tr style="min-height: 80px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 6px 4px;">故障发生经过</td>
-      <td colspan="2" style="padding: 6px 10px; line-height: 1.8;">${escapeHtml(d.faultDescription || '')}</td>
+    <tr style="min-height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障发生经过</td>
+      <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.faultDescription || '')}</td>
       ${sigCell('faultDesc')}
     </tr>
     
-    <tr style="min-height: 80px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 6px 4px;">维修内容</td>
-      <td colspan="2" style="padding: 6px 10px; line-height: 1.8;">${escapeHtml(d.repairContent || '')}</td>
+    <tr style="min-height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">维修内容</td>
+      <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.repairContent || '')}</td>
       ${sigCell('repair')}
     </tr>
     
-    <tr style="min-height: 80px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 6px 4px;">更换的配件<br>及耗材</td>
-      <td colspan="2" style="padding: 6px 10px; line-height: 1.8;">${escapeHtml(d.partsReplaced || '')}</td>
+    <tr style="min-height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">更换的配件<br>及耗材</td>
+      <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.partsReplaced || '')}</td>
       ${sigCell('parts')}
     </tr>
     
-    <tr style="min-height: 70px; vertical-align: top;">
-      <td rowspan="2" style="text-align: center; font-weight: bold; padding: 6px 4px;">修理结果</td>
-      <td rowspan="2" colspan="2" style="padding: 6px 10px; line-height: 1.8;">${escapeHtml(d.repairResult || '')}</td>
-      <td style="padding: 6px 8px; line-height: 1.8; vertical-align: top;">
-        安全管理员：<br>
-        ${d.signatures && d.signatures.safety ? '<img src="' + d.signatures.safety + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
-        <br><br>
-        <span style="font-size: 12px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span>
-      </td>
+    <tr style="min-height: 50px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">修理结果</td>
+      <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.repairResult || '')}</td>
     </tr>
     
-    <tr style="min-height: 70px; vertical-align: top;">
-      <td style="padding: 6px 8px; line-height: 1.8; vertical-align: top;">
+    <tr style="min-height: 55px; vertical-align: top;">
+      <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
+        安全管理员：<br>
+        ${d.signatures && d.signatures.safety ? '<img src="' + d.signatures.safety + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
+        <br>
+        <div style="text-align: right; padding-right: 4px;"><span style="font-size: 13px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
+      </td>
+      <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         验收人：<br>
         ${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
-        <br><br>
+        <br>
         使用单位（公章）：<br>
-        <span style="font-size: 12px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span>
+        <div style="text-align: right; padding-right: 4px;"><span style="font-size: 13px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
+      <td></td>
     </tr>
   </table>
 </div>`;
