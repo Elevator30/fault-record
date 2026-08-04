@@ -1005,16 +1005,15 @@ function buildPrintHTML(callback) {
     </tr>
     
     <tr style="min-height: 55px; vertical-align: top;">
-      <td colspan="4" style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
-        检验人员：${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <span style="font-size: 13px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span>
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">修理结果</td>
+      <td colspan="3" style="padding: 4px 10px; line-height: 1.4; vertical-align: middle;">
+        ${escapeHtml(d.repairResult || '')}
       </td>
     </tr>
-    <tr style="min-height: 55px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">修理结果</td>
-      <td colspan="3" style="padding: 4px 10px; line-height: 1.4; vertical-align: middle; position: relative;">
-        ${escapeHtml(d.repairResult || '')}
+    <tr style="min-height: 55px; vertical-align: top; position: relative;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: top;">检验人员</td>
+      <td colspan="3" style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
+        ${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
         <br>
         使用单位（公章）：<br>
         <img src="${stampUrl}" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; opacity: 0.45; pointer-events: none;">
