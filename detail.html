@@ -899,9 +899,9 @@ function buildPrintHTML(callback) {
   
   function sigCell(rowKey, hasSignContent) {
     const sigImg = d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : '';
-    return '<td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">' +
+    return '<td style="padding: 4px 8px; line-height: 1.4; vertical-align: top; position: relative;">' +
       '维修人：<br>' + sigImg + '<br>' +
-      '维保单位（公章）：<br>' +
+      '维保单位（公章）：<br>' + stampHtml(rowKey) +
       '<div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>' +
       '</td>';
   }
@@ -1004,7 +1004,7 @@ function buildPrintHTML(callback) {
       ${sigCell('parts')}
     </tr>
     
-    <tr style="height: 60px; vertical-align: top; position: relative;">
+    <tr style="height: 60px; vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">修理结果</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4; vertical-align: middle;">
         ${escapeHtml(d.repairResult || '')}
@@ -1012,17 +1012,15 @@ function buildPrintHTML(callback) {
       <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         安全管理员：${d.signatures && d.signatures.safetyAdmin ? '<img src="' + d.signatures.safetyAdmin + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br>
         使用单位（公章）：<br>
-        <img src="${stampUrl}" style="position: absolute; bottom: 8px; left: 75%; transform: translateX(-50%); width: 70px; height: 70px; opacity: 0.45; pointer-events: none;">
         <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
     </tr>
-    <tr style="height: 60px; vertical-align: top; position: relative;">
+    <tr style="height: 60px; vertical-align: top;">
       <td></td>
       <td colspan="2"></td>
       <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         验收人：${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br><br>
         使用单位（公章）：<br>
-        <img src="${stampUrl}" style="position: absolute; bottom: 8px; left: 75%; transform: translateX(-50%); width: 70px; height: 70px; opacity: 0.45; pointer-events: none;">
         <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
     </tr>
