@@ -908,6 +908,10 @@ function buildPrintHTML(callback) {
 
   const html = `
 <div style="width: 100%; padding: 6px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
+  <style>
+    #printArea table { font-size: 17px; }
+    #printArea table td { font-size: 17px !important; line-height: 1.4; }
+  </style>
   <h2 style="text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 8px; letter-spacing: 4px;">电梯故障记录表</h2>
   
   <table border="1" cellpadding="3" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 17px; table-layout: fixed;">
@@ -969,8 +973,8 @@ function buildPrintHTML(callback) {
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.fixPerson || '')}</td>
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障原因</td>
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">故障原因</td>
       <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
@@ -986,25 +990,25 @@ function buildPrintHTML(callback) {
       </td>
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障发生经过</td>
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">故障发生经过</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.faultDescription || '')}</td>
       ${sigCell('faultDesc')}
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">维修内容</td>
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">维修内容</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.repairContent || '')}</td>
       ${sigCell('repair')}
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">更换的配件<br>及耗材</td>
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">更换的配件<br>及耗材</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.partsReplaced || '')}</td>
       ${sigCell('parts')}
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
+    <tr style="height: 60px; vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">修理结果</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4; vertical-align: middle;">
         ${escapeHtml(d.repairResult || '')}
@@ -1015,8 +1019,8 @@ function buildPrintHTML(callback) {
         <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
     </tr>
-    <tr style="min-height: 60px; vertical-align: top;">
-      <td></td>
+    <tr style="height: 60px; vertical-align: top;">
+      <td style="text-align: center; vertical-align: middle;"></td>
       <td colspan="2"></td>
       <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         验收人：${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br><br>
