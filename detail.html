@@ -973,7 +973,7 @@ function buildPrintHTML(callback) {
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.fixPerson || '')}</td>
     </tr>
     
-    <tr style="height: 60px; vertical-align: top;">
+    <tr style="vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">故障原因</td>
       <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
