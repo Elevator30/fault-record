@@ -919,21 +919,21 @@ function buildPrintHTML(callback) {
       <col style="width: 32%;">
     </colgroup>
     
-    <tr style="height: 32px;">
+    <tr style="height: 28px;">
       <td style="text-align: center; font-weight: bold;">设备名称</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.deviceName || '')}</td>
       <td style="text-align: center; font-weight: bold;">维保单位</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.maintenanceUnit || '')}</td>
     </tr>
     
-    <tr style="height: 32px;">
+    <tr style="height: 28px;">
       <td style="text-align: center; font-weight: bold;">设备型号</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.deviceModel || '')}</td>
       <td style="text-align: center; font-weight: bold;">产品编号</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.productNo || '')}</td>
     </tr>
     
-    <tr style="height: 32px;">
+    <tr style="height: 28px;">
       <td style="text-align: center; font-weight: bold;">故障发生时间</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(faultDate)}</td>
       <td style="text-align: center; font-weight: bold;">报修时间</td>
@@ -956,14 +956,14 @@ function buildPrintHTML(callback) {
       </td>
     </tr>
     
-    <tr style="height: 32px;">
+    <tr style="height: 28px;">
       <td style="text-align: center; font-weight: bold;">是否困人</td>
       <td style="padding: 0 8px;">${d.isTrapped === '是' ? '☑' : '□'} 是 &nbsp;&nbsp;&nbsp; ${d.isTrapped === '否' ? '☑' : '□'} 否</td>
       <td style="text-align: center; font-weight: bold;">被困人数</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(d.trappedCount || '')} 人</td>
     </tr>
     
-    <tr style="height: 32px;">
+    <tr style="height: 28px;">
       <td style="text-align: center; font-weight: bold;">故障排除时间</td>
       <td style="padding: 0 8px; text-align: center;">${escapeHtml(fixDate)}</td>
       <td style="text-align: center; font-weight: bold;">故障排除人</td>
@@ -1005,18 +1005,18 @@ function buildPrintHTML(callback) {
       ${sigCell('parts')}
     </tr>
     
-    <tr style="min-height: 50px; vertical-align: top;">
-      <td style="text-align: center; font-weight: bold; padding: 4px 4px;">修理结果</td>
-      <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.repairResult || '')}</td>
-    </tr>
-    
     <tr style="min-height: 55px; vertical-align: top;">
+      <td rowspan="2" style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">修理结果</td>
+      <td rowspan="2" style="padding: 4px 10px; line-height: 1.4; vertical-align: middle;">${escapeHtml(d.repairResult || '')}</td>
       <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         安全管理员：<br>
         ${d.signatures && d.signatures.safety ? '<img src="' + d.signatures.safety + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
         <br>
+        使用单位（公章）：<br>
         <div style="text-align: right; padding-right: 4px;"><span style="font-size: 13px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
+    </tr>
+    <tr style="min-height: 55px; vertical-align: top;">
       <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         验收人：<br>
         ${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}
@@ -1024,7 +1024,6 @@ function buildPrintHTML(callback) {
         使用单位（公章）：<br>
         <div style="text-align: right; padding-right: 4px;"><span style="font-size: 13px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
-      <td></td>
     </tr>
   </table>
 </div>`;
