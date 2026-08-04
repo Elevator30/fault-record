@@ -941,7 +941,7 @@ function buildPrintHTML(callback) {
     
     <tr style="height: 28px;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障模式</td>
-      <td colspan="3" style="padding: 4px 10px; line-height: 1.2; font-size: 10px;">
+      <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">
         ${FAULT_MODES.slice(0,5).map(function(m) {
           const checked = (d.faultModes || []).indexOf(m) >= 0;
           return (checked ? '☑' : '□') + ' ' + m + ' ';
@@ -971,7 +971,7 @@ function buildPrintHTML(callback) {
     
     <tr style="min-height: 90px; vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障原因</td>
-      <td colspan="3" style="padding: 4px 10px; line-height: 1.2; font-size: 10px;">
+      <td colspan="3" style="padding: 4px 10px; line-height: 1.4;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
         维保缺陷：<br>
