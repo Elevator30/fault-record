@@ -902,7 +902,7 @@ function buildPrintHTML(callback) {
     return '<td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">' +
       '维修人：<br>' + sigImg + '<br>' +
       '维保单位（公章）：<br>' +
-      '<div style="text-align: right; padding-right: 4px;"><span style="font-size: 14px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>' +
+      '<div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>' +
       '</td>';
   }
 
@@ -910,7 +910,7 @@ function buildPrintHTML(callback) {
 <div style="width: 100%; padding: 6px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
   <h2 style="text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 8px; letter-spacing: 4px;">电梯故障记录表</h2>
   
-  <table border="1" cellpadding="3" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed;">
+  <table border="1" cellpadding="3" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 15px; table-layout: fixed;">
     <colgroup>
       <col style="width: 15%;">
       <col style="width: 35%;">
@@ -986,19 +986,19 @@ function buildPrintHTML(callback) {
       </td>
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
+    <tr style="height: 60px; vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px;">故障发生经过</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.faultDescription || '')}</td>
       ${sigCell('faultDesc')}
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
+    <tr style="height: 60px; vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px;">维修内容</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.repairContent || '')}</td>
       ${sigCell('repair')}
     </tr>
     
-    <tr style="min-height: 60px; vertical-align: top;">
+    <tr style="height: 60px; vertical-align: top;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px;">更换的配件<br>及耗材</td>
       <td colspan="2" style="padding: 4px 10px; line-height: 1.4;">${escapeHtml(d.partsReplaced || '')}</td>
       ${sigCell('parts')}
@@ -1006,24 +1006,24 @@ function buildPrintHTML(callback) {
     
     <tr style="height: 60px; vertical-align: top; position: relative;">
       <td style="text-align: center; font-weight: bold; padding: 4px 4px; vertical-align: middle;">修理结果</td>
-      <td style="padding: 4px 10px; line-height: 1.4; vertical-align: middle;">
+      <td colspan="2" style="padding: 4px 10px; line-height: 1.4; vertical-align: middle;">
         ${escapeHtml(d.repairResult || '')}
       </td>
-      <td colspan="2" style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
+      <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         安全管理员：${d.signatures && d.signatures.safetyAdmin ? '<img src="' + d.signatures.safetyAdmin + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br>
         使用单位（公章）：<br>
         <img src="${stampUrl}" style="position: absolute; bottom: 8px; left: 75%; transform: translateX(-50%); width: 70px; height: 70px; opacity: 0.45; pointer-events: none;">
-        <div style="text-align: right; padding-right: 4px;"><span style="font-size: 14px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
+        <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
     </tr>
     <tr style="height: 60px; vertical-align: top; position: relative;">
       <td></td>
-      <td></td>
-      <td colspan="2" style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
+      <td colspan="2"></td>
+      <td style="padding: 4px 8px; line-height: 1.4; vertical-align: top;">
         验收人：${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br><br>
         使用单位（公章）：<br>
         <img src="${stampUrl}" style="position: absolute; bottom: 8px; left: 75%; transform: translateX(-50%); width: 70px; height: 70px; opacity: 0.45; pointer-events: none;">
-        <div style="text-align: right; padding-right: 4px;"><span style="font-size: 14px;">年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
+        <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
     </tr>
   </table>
