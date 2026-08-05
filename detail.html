@@ -988,12 +988,12 @@ function buildPrintHTML(callback) {
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
         维保缺陷：${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.adjust) ? '☑' : '□'}调整（设置）不当，
-          ${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.miss) ? '☑' : '□'}维保检查未发现，
-          ${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.other) ? '☑' : '□'}其他${d.maintenanceOther ? '（' + d.maintenanceOther + '）' : ''}<br>
+          ${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.miss) ? '☑' : '□'}维保检查未发现<br>
+        ${'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.other) ? '☑' : '□'}其他${d.maintenanceOther ? '（' + d.maintenanceOther + '）' : ''}<br>
         使用管理不当：${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.door) ? '☑' : '□'}门被异物卡住，
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.manual) ? '☑' : '□'}人为损坏、误操作或操作不当，
-          ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.power) ? '☑' : '□'}停电、跳闸，
-          ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.other) ? '☑' : '□'}其他${d.usageOther ? '（' + d.usageOther + '）' : ''}
+          ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.power) ? '☑' : '□'}停电、跳闸<br>
+        ${'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.other) ? '☑' : '□'}其他${d.usageOther ? '（' + d.usageOther + '）' : ''}
       </td>
     </tr>
     
