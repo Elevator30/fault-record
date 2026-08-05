@@ -901,14 +901,14 @@ function buildPrintHTML(callback) {
   }
   
   // 通用td样式常量
-  const S = 'font-size:15px;line-height:1.4;';
+  const S = 'line-height:1.4;';
   const SL = 'text-align:center;padding:4px;vertical-align:middle;height:56px;border:1px solid #000;' + S;
   const SV = 'padding:0 8px;text-align:center;height:56px;border:1px solid #000;' + S;
   const S7L = 'text-align:center;padding:4px;vertical-align:middle;height:80px;border:1px solid #000;' + S;
   const S7C = 'padding:4px 10px;height:80px;border:1px solid #000;' + S;
   const SC = 'padding:4px 10px;height:60px;border:1px solid #000;' + S;
   const SC56 = 'padding:4px 10px;height:56px;overflow:hidden;border:1px solid #000;' + S;
-  const SIG = 'padding:4px 8px;font-size:15px;line-height:1.4;vertical-align:top;height:60px;position:relative;border:1px solid #000;';
+  const SIG = 'padding:4px 8px;line-height:1.4;vertical-align:top;height:60px;position:relative;border:1px solid #000;';
 
   function sigCell(rowKey, hasSignContent) {
     const sigImg = d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : '';
@@ -920,10 +920,10 @@ function buildPrintHTML(callback) {
   }
 
   const html = `
-<div style="width: 100%; padding: 6px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
+<div style="width: 100%; padding: 6px; font-family: 'SimSun', '宋体', serif; font-size: 16px; color: #000; background: white;">
   <h2 style="text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 8px; letter-spacing: 4px;">电梯故障记录表</h2>
   
-  <table cellpadding="3" cellspacing="0" style="width: 100%; border-spacing: 0; border-collapse: separate; table-layout: fixed; border: 1px solid #000;">
+  <table cellpadding="3" cellspacing="0" style="width: 100%; border-spacing: 0; border-collapse: separate; table-layout: fixed; border: 1px solid #000; font-size: 16px;">
     <colgroup>
       <col style="width: 15%;">
       <col style="width: 35%;">
