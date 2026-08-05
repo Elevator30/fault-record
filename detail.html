@@ -982,7 +982,7 @@ function buildPrintHTML(callback) {
     
     <tr>
       <td style="${SL}">故障原因</td>
-      <td colspan="3" style="padding: 2px 10px; font-size: 17px; line-height: 1.4; border:1px solid #000;">
+      <td colspan="3" style="padding: 2px 10px; font-size: 12px; line-height: 1.0; border:1px solid #000;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
         维保缺陷：${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.adjust) ? '☑' : '□'}调整（设置）不当，
@@ -992,7 +992,6 @@ function buildPrintHTML(callback) {
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.manual) ? '☑' : '□'}人为损坏、误操作或操作不当，
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.power) ? '☑' : '□'}停电、跳闸，
           ${(data.faultCauses && data.faultCauses.usageSubItems && data.faultCauses.usageSubItems.other) ? '☑' : '□'}其他${d.usageOther ? '（' + d.usageOther + '）' : ''}
-        <div style="height:20px;font-size:0;line-height:0;"></div>
       </td>
     </tr>
     
