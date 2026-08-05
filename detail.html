@@ -897,7 +897,7 @@ function buildPrintHTML(callback) {
   
   function stampHtml(rowKey) {
     if (rowKey !== stampRow) return '';
-    return '<img src="' + stampUrl + '" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 153px; height: 155px; opacity: 0.45; pointer-events: none;">';
+    return '<img src="' + stampUrl + '" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 153px; height: 155px; opacity: 0.45; pointer-events: none;">';
   }
   
   // 通用td样式常量
