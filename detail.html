@@ -899,14 +899,16 @@ function buildPrintHTML(callback) {
   
   // 通用td样式常量
   const S = 'font-size:17px;line-height:1.4;';
-  const SL = 'text-align:center;font-weight:bold;padding:4px;vertical-align:middle;' + S;
-  const SV = 'padding:0 8px;text-align:center;' + S;
-  const SC = 'padding:4px 10px;' + S;
+  const SL = 'text-align:center;font-weight:bold;padding:4px;vertical-align:middle;height:56px;' + S;
+  const SV = 'padding:0 8px;text-align:center;height:56px;' + S;
+  const SC = 'padding:4px 10px;height:60px;' + S;
+  const SC56 = 'padding:4px 10px;height:56px;overflow:hidden;' + S;
+  const SIG = 'padding:4px 8px;font-size:17px;line-height:1.4;vertical-align:top;height:60px;position:relative;';
 
   function sigCell(rowKey, hasSignContent) {
     const sigImg = d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : '';
-    return '<td style="padding: 4px 8px; font-size:17px; line-height: 1.4; vertical-align: top; position: relative;">' +
-      '维修人：<br>' + sigImg + '<br>' +
+    return '<td style="' + SIG + '">' +
+      '维修人：<br>' + sigImg + '<br><br>' +
       '维保单位（公章）：<br>' + stampHtml(rowKey) +
       '<div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>' +
       '</td>';
@@ -947,7 +949,7 @@ function buildPrintHTML(callback) {
     
     <tr>
       <td style="${SL}">故障模式</td>
-      <td colspan="3" style="${SC}">
+      <td colspan="3" style="${SC56}">
         ${FAULT_MODES.slice(0,5).map(function(m) {
           const checked = (d.faultModes || []).indexOf(m) >= 0;
           return (checked ? '☑' : '□') + ' ' + m + ' ';
@@ -963,7 +965,7 @@ function buildPrintHTML(callback) {
     
     <tr>
       <td style="${SL}">是否困人</td>
-      <td style="padding: 0 8px;${S}">${d.isTrapped === '是' ? '☑' : '□'} 是 &nbsp;&nbsp;&nbsp; ${d.isTrapped === '否' ? '☑' : '□'} 否</td>
+      <td style="padding:0 8px;height:56px;${S}">${d.isTrapped === '是' ? '☑' : '□'} 是 &nbsp;&nbsp;&nbsp; ${d.isTrapped === '否' ? '☑' : '□'} 否</td>
       <td style="${SL}">被困人数</td>
       <td style="${SV}">${escapeHtml(d.trappedCount || '')} 人</td>
     </tr>
@@ -977,7 +979,7 @@ function buildPrintHTML(callback) {
     
     <tr>
       <td style="${SL}">故障原因</td>
-      <td colspan="3" style="padding: 2px 10px; font-size: 12px; line-height: 1.0;">
+      <td colspan="3" style="padding: 2px 10px; font-size: 17px; line-height: 1.4;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
         维保缺陷：<br>
@@ -1015,8 +1017,8 @@ function buildPrintHTML(callback) {
       <td colspan="2" style="${SC}vertical-align:middle;">
         ${escapeHtml(d.repairResult || '')}
       </td>
-      <td style="padding: 4px 8px; font-size:17px; line-height: 1.4; vertical-align: top;">
-        安全管理员：${d.signatures && d.signatures.safetyAdmin ? '<img src="' + d.signatures.safetyAdmin + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br>
+      <td style="${SIG}">
+        安全管理员：${d.signatures && d.signatures.safetyAdmin ? '<img src="' + d.signatures.safetyAdmin + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br><br>
         使用单位（公章）：<br>
         <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
       </td>
@@ -1024,7 +1026,7 @@ function buildPrintHTML(callback) {
     <tr>
       <td style="text-align:center;vertical-align:middle;${S}"></td>
       <td colspan="2" style="${S}"></td>
-      <td style="padding: 4px 8px; font-size:17px; line-height: 1.4; vertical-align: top;">
+      <td style="${SIG}">
         验收人：${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br><br>
         使用单位（公章）：<br>
         <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
