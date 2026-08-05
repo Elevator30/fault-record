@@ -242,7 +242,7 @@ body {
   position: fixed;
   left: -9999px;
   top: -9999px;
-  width: 780px;
+  width: 830px;
   background: white;
 }
 
@@ -902,11 +902,11 @@ function buildPrintHTML(callback) {
   
   // 通用td样式常量
   const S = 'font-size:17px;line-height:1.4;';
-  const SL = 'text-align:center;font-weight:bold;padding:4px;vertical-align:middle;height:56px;' + S;
-  const SV = 'padding:0 8px;text-align:center;height:56px;' + S;
-  const SC = 'padding:4px 10px;height:60px;' + S;
-  const SC56 = 'padding:4px 10px;height:56px;overflow:hidden;' + S;
-  const SIG = 'padding:4px 8px;font-size:17px;line-height:1.4;vertical-align:top;height:60px;position:relative;';
+  const SL = 'text-align:center;font-weight:bold;padding:4px;vertical-align:middle;height:56px;border:1px solid #000;' + S;
+  const SV = 'padding:0 8px;text-align:center;height:56px;border:1px solid #000;' + S;
+  const SC = 'padding:4px 10px;height:60px;border:1px solid #000;' + S;
+  const SC56 = 'padding:4px 10px;height:56px;overflow:hidden;border:1px solid #000;' + S;
+  const SIG = 'padding:4px 8px;font-size:17px;line-height:1.4;vertical-align:top;height:60px;position:relative;border:1px solid #000;';
 
   function sigCell(rowKey, hasSignContent) {
     const sigImg = d.signatures && d.signatures.repair ? '<img src="' + d.signatures.repair + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : '';
@@ -921,7 +921,7 @@ function buildPrintHTML(callback) {
 <div style="width: 100%; padding: 6px; font-family: 'SimSun', '宋体', serif; color: #000; background: white;">
   <h2 style="text-align: center; font-size: 26px; font-weight: bold; margin-bottom: 8px; letter-spacing: 4px;">电梯故障记录表</h2>
   
-  <table border="1" cellpadding="3" cellspacing="0" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+  <table cellpadding="3" cellspacing="0" style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid #000;">
     <colgroup>
       <col style="width: 15%;">
       <col style="width: 35%;">
@@ -968,7 +968,7 @@ function buildPrintHTML(callback) {
     
     <tr>
       <td style="${SL}">是否困人</td>
-      <td style="padding:0 8px;height:56px;${S}">${d.isTrapped === '是' ? '☑' : '□'} 是 &nbsp;&nbsp;&nbsp; ${d.isTrapped === '否' ? '☑' : '□'} 否</td>
+      <td style="padding:0 8px;height:56px;border:1px solid #000;${S}">${d.isTrapped === '是' ? '☑' : '□'} 是 &nbsp;&nbsp;&nbsp; ${d.isTrapped === '否' ? '☑' : '□'} 否</td>
       <td style="${SL}">被困人数</td>
       <td style="${SV}">${escapeHtml(d.trappedCount || '')} 人</td>
     </tr>
@@ -982,7 +982,7 @@ function buildPrintHTML(callback) {
     
     <tr>
       <td style="${SL}">故障原因</td>
-      <td colspan="3" style="padding: 2px 10px; font-size: 12px; line-height: 1.0;">
+      <td colspan="3" style="padding: 2px 10px; font-size: 12px; line-height: 1.0; border:1px solid #000;">
         ${(data.faultCauses && data.faultCauses.design) ? '☑' : '□'} 设计制造缺陷<br>
         ${(data.faultCauses && data.faultCauses.install) ? '☑' : '□'} 安装缺陷<br>
         维保缺陷：${(data.faultCauses && data.faultCauses.maintenanceSubItems && data.faultCauses.maintenanceSubItems.adjust) ? '☑' : '□'}调整（设置）不当，
@@ -1091,7 +1091,7 @@ function generatePDF() {
       const pdf = new jsPDF('p', 'mm', 'a4');
       
       const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 190;
+      const imgWidth = 200;
       const imgHeight = canvas.height * imgWidth / canvas.width;
       
       // A4竖版可用高度约275mm
