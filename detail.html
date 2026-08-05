@@ -970,7 +970,7 @@ function buildPrintHTML(callback) {
       <td style="${SL}">是否困人</td>
       <td style="padding:0 8px;height:56px;border:1px solid #000;${S}">${d.isTrapped === '是' ? '☑' : '□'} 是 &nbsp;&nbsp;&nbsp; ${d.isTrapped === '否' ? '☑' : '□'} 否</td>
       <td style="${SL}">被困人数</td>
-      <td style="${SV}">${escapeHtml(d.trappedCount || '')} 人</td>
+      <td style="${SV}">${escapeHtml(d.isTrapped === '是' ? (d.trappedCount || '') + ' 人' : '')}</td>
     </tr>
     
     <tr>
