@@ -1014,8 +1014,8 @@ function buildPrintHTML(callback) {
     </tr>
     
     <tr>
-      <td style="${SL}">修理结果</td>
-      <td colspan="2" style="${SC}vertical-align:middle;">
+      <td rowspan="2" style="${SL}">修理结果</td>
+      <td rowspan="2" colspan="2" style="${SC}vertical-align:middle;">
         ${escapeHtml(d.repairResult || '')}
       </td>
       <td style="${SIG}">
@@ -1025,8 +1025,7 @@ function buildPrintHTML(callback) {
       </td>
     </tr>
     <tr>
-      <td colspan="2" style="text-align:center;vertical-align:middle;${S}"></td>
-      <td colspan="2" style="${SIG}">
+      <td style="${SIG}">
         验收人：${d.signatures && d.signatures.inspector ? '<img src="' + d.signatures.inspector + '" style="height: 26px; display: inline-block; vertical-align: middle;">' : ''}<br><br>
         使用单位（公章）：<br>
         <div style="text-align: right; padding-right: 4px;"><span>年&nbsp;&nbsp;月&nbsp;&nbsp;日</span></div>
